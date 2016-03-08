@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
     
 
     getLastValue(sockfd, buf, "tvLtsYgG1j6iekGp3QBYSV4vpbsgPZ", datasource, variable);
-    printf("Echo from server: %s", buf);
+    printf(buf);
     
     close(sockfd);
     return 0;
