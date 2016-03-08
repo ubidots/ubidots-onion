@@ -1,7 +1,7 @@
 CC := g++
 
 SRCDIR := src
-TARGET := bin/ubidots
+TARGET := bin/ubidots-onion
 
 
 CFLAGS := -fPIC -Wno-write-strings
