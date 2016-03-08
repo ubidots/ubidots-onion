@@ -7,7 +7,9 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
-#define BUFSIZE 1024
+#define BUFSIZE 256
+#define UBIDOTS_TRANSLATE "translate.ubidots.com"
+#define UBIDOTS_PORT 9010
 
 /* 
  * error - wrapper for perror
@@ -50,35 +52,59 @@ int connectSocket(char* hostname, int portno){
     return sockfd;
 }
 
-int main(int argc, char **argv) {
-    int sockfd, n;
-    char buf[BUFSIZE];
 
-    /* check command line arguments */
-    if (argc != 3) {
-       fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
-       exit(0);
-    }
-
-    //sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    sockfd  = connectSocket(argv[1], atoi(argv[2]));
-    
-    /* get message line from the user */
-    printf("Please enter msg: ");
+void getLastValue(int sockfd, char* buf, char* token, char* datasource, char* variable){
+    int n;
     bzero(buf, BUFSIZE);
-    fgets(buf, BUFSIZE, stdin);
+    sprintf(buf, "ONION.v1.0|LV|%s|%s:%s|end", token, datasource, variable);
 
-    /* send the message line to the server */
     n = write(sockfd, buf, strlen(buf));
     if (n < 0) 
       error("ERROR writing to socket");
 
-    /* print the server's reply */
     bzero(buf, BUFSIZE);
     n = read(sockfd, buf, BUFSIZE);
-    if (n < 0) 
-      error("ERROR reading from socket");
+    if (n < 0) {
+        error("ERROR reading from socket");
+    }
+}
+
+int main(int argc, char **argv) {
+    int sockfd, n;
+    char buf[BUFSIZE];
+
+    if (argc < 2) {
+       fprintf(stderr,"usage: %s [send, get] <options>\n", argv[0]);
+       exit(1);
+    }
+
+    if (!(strcmp(argv[1], "send") == 0 || strcmp(argv[1], "get") == 0)){
+       fprintf(stderr,"usage: %s [send, get] <options>\n", argv[0]);
+       exit(1);
+        
+    }
+    char* datasource;
+    char* variable;
+    datasource = new char[512];
+    variable = new char[512];
+
+    for (int i=2; i<argc; i++) {
+        if (strcmp(argv[i], "-ds") == 0){
+            strcpy(datasource, argv[++i] );
+        }
+        else if (strcmp(argv[i], "-v") == 0){
+            strcpy(variable, argv[++i] );
+        }
+    }
+    
+    /* check command line arguments */
+
+    sockfd  = connectSocket(UBIDOTS_TRANSLATE, UBIDOTS_PORT);
+    
+
+    getLastValue(sockfd, buf, "tvLtsYgG1j6iekGp3QBYSV4vpbsgPZ", datasource, variable);
     printf("Echo from server: %s", buf);
+    
     close(sockfd);
     return 0;
 }
