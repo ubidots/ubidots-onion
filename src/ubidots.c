@@ -69,10 +69,30 @@ void getLastValue(int sockfd, char* buf, char* token, char* datasource, char* va
     }
 }
 
+void sendData(int sockfd, char* buf, char* token, char* datasource, char* data){
+    int n;
+    bzero(buf, BUFSIZE);
+    sprintf(buf, "ONION.v1.0|POST|%s|%s,%s|end", token, datasource, data);
+
+    n = write(sockfd, buf, strlen(buf));
+    if (n < 0) 
+      error("ERROR writing to socket");
+
+    bzero(buf, BUFSIZE);
+    n = read(sockfd, buf, BUFSIZE);
+    if (n < 0) {
+        error("ERROR reading from socket");
+    }
+}
+
 int main(int argc, char **argv) {
     int sockfd, n;
     char buf[BUFSIZE];
+    char* datasource;
+    char* variable;
+    char* data;
 
+    
     if (argc < 2) {
        fprintf(stderr,"usage: %s [send, get] <options>\n", argv[0]);
        exit(1);
@@ -83,27 +103,35 @@ int main(int argc, char **argv) {
        exit(1);
         
     }
-    char* datasource;
-    char* variable;
     datasource = new char[512];
     variable = new char[512];
+    data = new char[512];
 
     for (int i=2; i<argc; i++) {
         if (strcmp(argv[i], "-ds") == 0){
             strcpy(datasource, argv[++i] );
-        }
-        else if (strcmp(argv[i], "-v") == 0){
+        }else if (strcmp(argv[i], "-v") == 0){
             strcpy(variable, argv[++i] );
+        }else if (strcmp(argv[i], "-d") == 0){
+            strcpy(data, argv[++i] );
         }
+
     }
     
     /* check command line arguments */
 
     sockfd  = connectSocket(UBIDOTS_TRANSLATE, UBIDOTS_PORT);
     
-
-    getLastValue(sockfd, buf, "tvLtsYgG1j6iekGp3QBYSV4vpbsgPZ", datasource, variable);
-    printf(buf);
+    if (strcmp(argv[1], "send")==0 && !strcmp(datasource, "")==0 && !strcmp(data, "")==0){
+        sendData(sockfd, buf, "tvLtsYgG1j6iekGp3QBYSV4vpbsgPZ", datasource, data);
+        printf(buf);
+    }else if(strcmp(argv[1], "get")==0  && !strcmp(datasource, "")==0 && !strcmp(variable, "")==0){
+        getLastValue(sockfd, buf, "tvLtsYgG1j6iekGp3QBYSV4vpbsgPZ", datasource, variable);
+        printf(buf);        
+    }else{
+       fprintf(stderr,"usage: %s [send, get] -d <datasource> -v <variable> -d <data>\n", argv[0]);
+       exit(1);
+    }
     
     close(sockfd);
     return 0;
