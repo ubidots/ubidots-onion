@@ -9,7 +9,7 @@ CFLAGS := -fPIC -Wno-write-strings
 
 default:
 	mkdir -p bin
-	$(CC) $(CFLAGS) src/ubidots.c -o $(TARGET)
+	$(CC) $(CFLAGS) src/ubidots.cpp -o $(TARGET)
 	@echo Build completed.
 
 clean:
