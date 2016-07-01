@@ -72,7 +72,7 @@ void getLastValue(int sockfd, char* buf, char* token, char* datasource, char* va
 void sendData(int sockfd, char* buf, char* token, char* datasource, char* data){
     int n;
     bzero(buf, BUFSIZE);
-    sprintf(buf, "ONION.v1.0|POST|%s|%s,%s|end", token, datasource, data);
+    sprintf(buf, "ONION.v1.0|POST|%s|%s=>%s|end", token, datasource, data);
 
     n = write(sockfd, buf, strlen(buf));
     if (n < 0) 
