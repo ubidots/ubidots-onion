@@ -8,8 +8,8 @@
 #include <netdb.h> 
 
 #define BUFSIZE 256
-#define UBIDOTS_TRANSLATE "translate.ubidots.com"
-#define UBIDOTS_PORT 9010
+#define UBIDOTS_TRANSLATE "industrial.api.ubidots.com"
+#define UBIDOTS_PORT 9012
 
 /* 
  * error - wrapper for perror
